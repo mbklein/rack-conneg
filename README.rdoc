@@ -1,0 +1,35 @@
+= Description
+Content negotiation for Rack applications, including a Rails-style respond_to block.
+
+= Features
+
+* Allows both file-extension-based and Accept: header-based content negotiation
+* Allows certain routes to pass through without negotiation (useful for static files, etc.)
+* Falls back to a pre-set type if negotiation fails
+* Injects a respond_to method with default handler into the application's namespace
+* Injects negotiated_type and negotiated_ext methods both into the application and into Rack::Request
+
+= Sinatra Example
+
+  require 'sinatra'
+  require 'rack/conneg'
+
+  use(Rack::Conneg) { |conneg|
+    conneg.set :accept_all_extensions, false
+    conneg.set :fallback, :html
+    conneg.ignore('/public/')
+    conneg.provide([:json, :xml])
+  }
+
+  before do
+    content_type negotiated_type
+  end
+  
+  get '/hello' do
+    response = { :message => 'Hello, World!' }
+    respond_to do |wants|
+      wants.json  { response.to_json         }
+      wants.xml   { response.to_xml          }
+      wants.other { error 400, "Bad Request" }
+    end
+  end
