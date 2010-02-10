@@ -7,7 +7,7 @@ begin
     s.version = Rack::Conneg::VERSION
     s.summary = "Content Negotiation middleware for Rack applications"
     s.email = "Michael.Klein@oregonstate.edu"
-    s.description = "Middleware that provides both file extensiona and HTTP_ACCEPT-type content negotiation for Rack applications"
+    s.description = "Middleware that provides both file extension and HTTP_ACCEPT-type content negotiation for Rack applications"
     s.authors = ["Michael B. Klein"]
     s.files = FileList["[A-Z]*", "README.rdoc", "{bin,lib,test}/**/*"]
     s.extra_rdoc_files = ['README.rdoc']
