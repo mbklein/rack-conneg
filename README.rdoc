@@ -30,6 +30,9 @@ Content negotiation for Rack applications, including a Rails-style respond_to bl
     respond_to do |wants|
       wants.json  { response.to_json         }
       wants.xml   { response.to_xml          }
-      wants.other { error 400, "Bad Request" }
+      wants.other { 
+        content_type 'text/plain'
+        error 406, "Not Acceptable" 
+      }
     end
   end
