@@ -5,7 +5,7 @@ module Rack #:nodoc:#
   
   class Conneg
     
-    VERSION = '0.1.2'
+    VERSION = '0.1.3'
     
     def initialize(app)
       @app = app
@@ -70,7 +70,7 @@ module Rack #:nodoc:#
           # Find the first item in accept_types that matches a registered
           # content type
           accept_types.find { |t|
-            re = %r{^#{t[:type].gsub(/\*/,'.+')}$}
+            re = %r{^#{Regexp.escape(t[:type].gsub(/\*/,'.+'))}$}
             @types.find { |type| re.match(type) ? mime_type = type : nil }
           }
         end
