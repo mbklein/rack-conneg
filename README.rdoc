@@ -7,7 +7,7 @@ Content negotiation for Rack applications, including a Rails-style respond_to bl
 * Allows certain routes to pass through without negotiation (useful for static files, etc.)
 * Falls back to a pre-set type if negotiation fails
 * Injects a respond_to method with default handler into the application's namespace
-* Injects negotiated_type and negotiated_ext methods both into the application and into Rack::Request
+* Injects negotiated_type, negotiated_ext, and negotiated? methods both into the application and into Rack::Request
 
 = Sinatra Example
 
