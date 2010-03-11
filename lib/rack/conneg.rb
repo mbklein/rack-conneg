@@ -5,7 +5,9 @@ module Rack #:nodoc:#
   
   class Conneg
     
-    VERSION = '0.1.3'
+    VERSION = '0.1.4'
+    
+    attr :ignores
     
     def initialize(app)
       @app = app
@@ -17,8 +19,9 @@ module Rack #:nodoc:#
       @types = []
 
       @app.class.module_eval {
-        def negotiated_ext  ; @rack_conneg_ext  ; end #:nodoc:#
-        def negotiated_type ; @rack_conneg_type ; end #:nodoc:#
+        def negotiated_ext  ; @rack_conneg_ext           ; end #:nodoc:#
+        def negotiated_type ; @rack_conneg_type          ; end #:nodoc:#
+        def negotiated?     ; not @rack_conneg_type.nil? ; end #:nodoc:#
         def respond_to
           wants = { '*/*' => Proc.new { raise TypeError, "No handler for #{@rack_conneg_type}" } }
           def wants.method_missing(ext, *args, &handler)
@@ -40,7 +43,7 @@ module Rack #:nodoc:#
     def call(env)
       extension = nil
       path_info = env['PATH_INFO']
-      unless @ignores.find { |ignore| ignore.match(path_info) }
+      unless ignored?(path_info)
         # First, check to see if there's an explicit type requested
         # via the file extension
         mime_type = Rack::Mime.mime_type(::File.extname(path_info),nil)
@@ -81,6 +84,11 @@ module Rack #:nodoc:#
       end
       @app.call(env) unless @app.nil?
     end
+
+    # Determine if the given path matches any items in the ignore list.
+    def ignored?(path_info)
+      @ignores.find { |ignore| ignore.match(path_info) } ? true : false
+    end
     
     # Should content negotiation accept any file extention passed as part of the URI path, 
     # even if it's not one of the registered provided types?
@@ -97,8 +105,28 @@ module Rack #:nodoc:#
     # Specifies a route prefix or Regexp that should be ignored by the content negotiator. Use
     # for static files or any other route that should be passed through unaltered.
     def ignore(route)
-      route_re = route.kind_of?(Regexp) ? route : %r{^#{route}}
+      route_re = route.kind_of?(Regexp) ? route : %r{^#{Regexp.escape(route)}}
       @ignores << route_re
+    end
+    
+    # Specifies a directory whose contents should be considered static and therefore ignored.
+    # Use with caution, since it acts recursively and can therefore build a pretty big 
+    # ignore list, slowing down each request. It's smart enough not to add anything that's 
+    # already been ignored, so if you ignore('/javascripts/') before you ignore_contents_of('public'),
+    # public/javascripts/* won't be added. In short, do all of your general ignore()ing before
+    # you ignore_contents_of().
+    def ignore_contents_of(path, prefix = '')
+      dir = Dir.open(path)
+      dir.select { |f| f !~ /^\.\.?$/ }.each { |entry|
+        entry_path = "#{prefix}/#{entry}"
+        unless ignored?(entry_path)
+          if ::File.directory?(::File.join(dir.path,entry))
+            ignore_contents_of(::File.join(dir.path,entry),entry_path)
+          else
+            ignore(%r{^#{Regexp.escape(entry_path)}$})
+          end
+        end
+      }
     end
     
     # Register one or more content types that the application offers. Can be a content type string,
@@ -142,8 +170,9 @@ module Rack #:nodoc:#
   end
   
   class Request
-    def negotiated_ext  ; @env['rack.conneg.ext']  ; end
-    def negotiated_type ; @env['rack.conneg.type'] ; end
+    def negotiated_ext  ; @env['rack.conneg.ext']           ; end
+    def negotiated?     ; not @env['rack.conneg.type'].nil? ; end
+    def negotiated_type ; @env['rack.conneg.type']          ; end
   end
 
 end

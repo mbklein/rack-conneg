@@ -17,12 +17,15 @@ Content negotiation for Rack applications, including a Rails-style respond_to bl
   use(Rack::Conneg) { |conneg|
     conneg.set :accept_all_extensions, false
     conneg.set :fallback, :html
-    conneg.ignore('/public/')
+    conneg.ignore('/stylesheets/')
+    conneg.ignore_contents_of(File.join(File.dirname(__FILE__),'public'))
     conneg.provide([:json, :xml])
   }
 
   before do
-    content_type negotiated_type
+    if negotiated?
+      content_type negotiated_type
+    end
   end
   
   get '/hello' do
