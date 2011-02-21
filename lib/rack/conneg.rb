@@ -56,26 +56,28 @@ module Rack #:nodoc:#
         else
           # Create an array of types out of the HTTP_ACCEPT header, sorted
           # by q value and original order
-          accept_types = env['HTTP_ACCEPT'].split(/,/)
-          accept_types.each_with_index { |t,i|
-            (accept_type,weight) = t.split(/;/)
-            weight = weight.nil? ? 1.0 : weight.split(/\=/).last.to_f
-            accept_types[i] = { :type => accept_type, :weight => weight, :order => i }
-          }
-          accept_types.sort! { |a,b| 
-            ord = b[:weight] <=> a[:weight] 
-            if ord == 0
-              ord = a[:order] <=> b[:order]
-            end
-            ord
-          }
+          if env['HTTP_ACCEPT']
+            accept_types = env['HTTP_ACCEPT'].split(/,/)
+            accept_types.each_with_index { |t,i|
+              (accept_type,weight) = t.split(/;/)
+              weight = weight.nil? ? 1.0 : weight.split(/\=/).last.to_f
+              accept_types[i] = { :type => accept_type, :weight => weight, :order => i }
+            }
+            accept_types.sort! { |a,b| 
+              ord = b[:weight] <=> a[:weight] 
+              if ord == 0
+                ord = a[:order] <=> b[:order]
+              end
+              ord
+            }
           
-          # Find the first item in accept_types that matches a registered
-          # content type
-          accept_types.find { |t|
-            re = %r{^#{Regexp.escape(t[:type].gsub(/\*/,'.+'))}$}
-            @types.find { |type| re.match(type) ? mime_type = type : nil }
-          }
+            # Find the first item in accept_types that matches a registered
+            # content type
+            accept_types.find { |t|
+              re = %r{^#{Regexp.escape(t[:type].gsub(/\*/,'.+'))}$}
+              @types.find { |type| re.match(type) ? mime_type = type : nil }
+            }
+          end
         end
         
         mime_type ||= fallback
