@@ -1,4 +1,5 @@
 = Description
+
 Content negotiation for Rack applications, including a Rails-style respond_to block.
 
 = Features
