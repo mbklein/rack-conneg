@@ -40,3 +40,10 @@ Content negotiation for Rack applications, including a Rails-style respond_to bl
       }
     end
   end
+
+= Release History
+
+<b>0.1.2</b> - Initial release
+<b>0.1.3</b> - Added proper RegExp escaping to match content types with + in them
+<b>0.1.4</b> - Added ignore_contents_of() to recursively ignore directory contents and negotiated? method to determine if negotiation took place
+<b>0.1.5</b> - Allow negotiation to fall back if no Accept: header supplied
