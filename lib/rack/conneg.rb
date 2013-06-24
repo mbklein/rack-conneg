@@ -53,7 +53,7 @@ module Rack #:nodoc:#
           if !(accept_all_extensions? || @types.include?(mime_type))
             mime_type = nil
           end
-        else
+        elsif env['HTTP_ACCEPT']
           # Create an array of types out of the HTTP_ACCEPT header, sorted
           # by q value and original order
           if env['HTTP_ACCEPT']
