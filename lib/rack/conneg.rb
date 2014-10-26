@@ -5,8 +5,6 @@ module Rack #:nodoc:#
   
   class Conneg
     
-    VERSION = '0.2.0'
-    
     attr :ignores
     
     def initialize(app)
