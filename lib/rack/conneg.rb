@@ -101,7 +101,7 @@ module Rack #:nodoc:#
     # What MIME type should be used as a fallback if negotiation fails? Defaults to 'text/html'
     # since that's what's used to deliver most error message content.
     def fallback
-      find_mime_type(@opts[:fallback])
+      find_mime_type(@opts[:fallback]) unless @opts[:fallback].nil?
     end
     
     # Specifies a route prefix or Regexp that should be ignored by the content negotiator. Use
